@@ -1,0 +1,19 @@
+#+TITLE: Learning Lisp One Game at A Time
+#+AUTHOR: Michael Espeña
+#+DESCRIPTION: My repository for documenting my journey of learning lisp one game a time
+
+* Table of contents :TOC:
+- [[#about][About]]
+- [[#progress][Progress]]
+
+* About
+
+This repository contains my documentations and codes for reading [[https://nostarch.com/lisp.htm][Land of Lisp: Learn to Program in Lisp, One Game at a Time!]] by Barski, M.D..
+
+I read the first few chapters of [[https://mitpress.mit.edu/sites/default/files/sicp/index.html][Structure and Interpretation of Computer Programs]] by Harold Abelson, Gerald Jay Sussman, Julie Sussman and it was beautifully and elegantly (much like the Lisp dialect used in the book itself) written. But my problem is I don't feel like progressing and outputting something as I learn as much as I like learning the theory first before doing something. (This is my problem with self-learning programming in general that I was learning without applying it to produce something.) Luckily, I found the former book which contains projects that you'll make as you read it. And so I will sort of combine what I learn from both books in the projects.
+
+It will be interesting to see the dynamics of Scheme - from what I've read so far, the more of a mathematician's Lisp - and Common Lisp - the more of an engineer's Lisp.
+
+* Progress
+
++ Chapter 2: Guess my number
