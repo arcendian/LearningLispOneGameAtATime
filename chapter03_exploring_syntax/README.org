@@ -1,0 +1,243 @@
+#+TITLE: Chapter 3: Exploring the Syntax of Lisp Code
+#+AUTHOR: Michael Espeña
+#+DESCRIPTION: Notes on Chapter 3
+
+* Table of contents :TOC:
+- [[#symbols][Symbols]]
+- [[#numbers-in-lisp][Numbers in Lisp]]
+- [[#strings][Strings]]
+- [[#how-lisp-distinguishes-between-code-and-data][How Lisp distinguishes between code and data]]
+  - [[#code-mode][Code mode]]
+- [[#data-mode][Data mode]]
+- [[#lists][Lists]]
+  - [[#cons-cells][Cons cells]]
+  - [[#list-functions][List functions]]
+- [[#summary][Summary]]
+
+* Symbols
+
+A symbol in lisp is stand-alone word, typically made up of letters, numbers and characters like +, -, /, *, =, <, >, ?, !, and _. Symbols are case-insensitive
+
+#+begin_src common-lisp
+
+  ;; comparing two symbols
+  (eq 'fooo 'FoOo) ;; returns true
+
+#+end_src
+
+
+* Numbers in Lisp
+
+Lisp supports both floating-point numbers and integers, which are different entities.
+
+When you combine and integer and a floating-point number, the integer will become /poisoned/ and a floating-point number will be returned.
+
+#+begin_src common-lisp
+
+  (+ 1 1.0) ;; returns 2.0 which is different from 2
+
+#+end_src
+
+
+Lisp can perform arithmetic with numbers even those that would be so large compared to other programming languages
+
+#+begin_src common-lisp
+
+  ;; raise 53 to the 53rd power
+  (expt 53 53) ;; returns 24356848165022712132477606520104725518533453128685640844505130879576720609150223301256150373
+
+#+end_src
+
+
+* Strings
+
+Strings in Lisp are similar to strings in most programming languages.
+
+#+begin_src emacs-lisp
+
+  (princ "Tutti Frutti")
+
+#+end_src
+
+The snippet above would return
+
+#+begin_example
+
+Tutti Frutti
+"Tutti Frutti"
+
+#+end_example
+
+in the REPL since princ returns a value which is the argument string while also printing the string out.
+
+
+* How Lisp distinguishes between code and data
+
+Common Lisp uses two modes when it reads your code: a /code/ mode and /data/ mode.
+
+
+** Code mode
+
+When typing in something in the REPL, the compiler assumes that you're entering a command you want to execute, that is you are writing code and Lisp defaults to code mode.
+
+The code you enter in the REPL however should be entered in a special type of list called a /form/.
+
+A form is simply a list with a special command at the beginning - typically the name of a function.
+
+#+begin_src common-lisp
+
+  (expt 2 3) ;; returns 8
+
+#+end_src
+
+Lisp also assumes the parameters are in code mode.
+
+#+begin_src common-lisp
+
+  (expt 2 (+ 3 4)) ;; returns 128
+
+#+end_src
+
+Lisp evaluates the code above like this:
++ First it sees the entire expression in code mode.
++ Then it looks at the arguments in code mode; in the example Lisp sees (+ 3 4) as a form and evaluates it and returns 7.
++ Afterwards 7 is used the as the power of 2 and the outer form is evaluated and returns 128.
+
+
+* Data mode
+
+Any stuff written in data mode is treated as data, i.e., the computer will not try to "execute" it, which allows information in code that is just plain data.
+
+#+begin_src common-lisp
+
+  '(expt 2 3) ;; returns (expt 2 3)
+
+#+end_src
+
+By putting a single quote (') in front of the list data mode is activated and you apply /quoting/ which is like telling the computer "This expression (expt 2 3) isn't a command. It's just a chunk of data for my program."
+
+
+* Lists
+
+Lists are what hold all of your Lisp code and data together. Lists in Lisp are made up of /cons cells/.
+
+** Cons cells
+
+Cons cells are like linked lists that have an element and a pointer to the next element (that could also possibly be a cons cell).
+
+#+begin_example 
+
+ ( 1, _ )
+      |
+      --> ( 2, _ )
+               |
+               --> ( 3, _ )
+                        |
+                        --> nil
+#+end_example
+
+
+** List functions
+
+In this section we are introduced to three basic functions to manipulate lists in Lisp:
+
++ cons
++ car
++ cdr
+
+
+*** cons
+
+~cons~ is used to link any two pieces of data.
+
+#+begin_src common-lisp
+
+  (cons 'chicken 'cat) ;; returns (CHICKEN . CAT)
+  
+#+end_src 
+
+Cons returns a single oject, the cons cell, represented by parentheses and a dot between the connected item. This is not to be confused with a regular list.
+
+Linking with ~nil~ results in just a list of with single element.
+
+#+begin_src common-lisp
+
+  (cons 'chicken ())
+    ;; or
+  (cons 'chicken 'nil) ;; returns (CHICKEN)
+                       ;; because nil = (), the empty list
+
+#+end_src
+
+*** cdr
+
+~cdr~ is basically the ~tail~ equivalent in Haskell.
+
+
+#+begin_src common-lisp
+
+  (cdr '(pork beef chicken)) ;; returns PORK
+
+  (cdr '(pork beef chicken)) ;; returns (BEEF CHICKEN)
+
+#+end_src
+
+
+*** cda
+
+~car~ is also basically the ~head~ equivalent in Haskell.
+
+#+begin_src common-lisp
+
+  (car '(beef chicken)) ;; returns BEEF
+
+#+end_src
+
+*NOTE*: We can nest car and cdr up to four levels deep, like caddr or cadadr. Five levels and more, the we'll have to write our own functions.
+
+*** list
+
+~list~ is function to create lists from data so we don't have to combine them using cons ourselves.
+
+#+begin_src common-lisp
+
+  (list 'pork 'beef 'chicken) ;; returns (PORK BEEF CHICKEN)
+
+  ;; is equivalent to
+  (cons 'pork (cons 'beef (cons 'chicken ())))
+
+  ;; or
+
+  '(pork beef chicken)
+
+#+end_src
+
+*** nested lists
+
+Nested lists are basically lists containing lists.
+
+The following shows some examples of working with nested lists.
+
+#+begin_src common-lisp
+
+  (car '((peas carrots tomatoes) (pork beef chicken)))
+  ;; returns (PEAS CARROTS TOMATOES)
+
+  (cdr '(peas carrots tomatoes))
+  ;; returns (CARROTS TOMATOES)
+
+  (cdr (car '((peas carrots tomatoes) (pork beef chicken))))
+  ;; returns (CARROTS TOMATOES)
+
+  (cdar '((peas carrots tomatoes) (pork chicken)))
+  ;; returns (CARROTS TOMATOES)
+
+#+end_src
+
+
+* Summary
+
++ Parentheses in Lisp are there to keep the amount of syntax to minimum. (But really it's just lambda calculus and Polish notation.)
++ Lists are created from cons cells.
++ You can create lists by making cons cells with ~cons~ command.
++ You can inspect the pieces of a list with ~car~ and ~cdr~.
