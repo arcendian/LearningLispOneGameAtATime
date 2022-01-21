@@ -21,7 +21,7 @@ A symbol in lisp is stand-alone word, typically made up of letters, numbers and 
 #+begin_src common-lisp
 
   ;; comparing two symbols
-  (eq 'fooo 'FoOo) ;; returns true
+  (eq 'fooo 'FoOo) ;; --> T (true)
 
 #+end_src
 
@@ -34,7 +34,7 @@ When you combine and integer and a floating-point number, the integer will becom
 
 #+begin_src common-lisp
 
-  (+ 1 1.0) ;; returns 2.0 which is different from 2
+  (+ 1 1.0) ;; --> 2.0 which is different from 2
 
 #+end_src
 
@@ -44,7 +44,7 @@ Lisp can perform arithmetic with numbers even those that would be so large compa
 #+begin_src common-lisp
 
   ;; raise 53 to the 53rd power
-  (expt 53 53) ;; returns 24356848165022712132477606520104725518533453128685640844505130879576720609150223301256150373
+  (expt 53 53) ;; --> 24356848165022712132477606520104725518533453128685640844505130879576720609150223301256150373
 
 #+end_src
 
@@ -86,7 +86,7 @@ A form is simply a list with a special command at the beginning - typically the 
 
 #+begin_src common-lisp
 
-  (expt 2 3) ;; returns 8
+  (expt 2 3) ;; --> 8
 
 #+end_src
 
@@ -94,7 +94,7 @@ Lisp also assumes the parameters are in code mode.
 
 #+begin_src common-lisp
 
-  (expt 2 (+ 3 4)) ;; returns 128
+  (expt 2 (+ 3 4)) ;; --> 128
 
 #+end_src
 
@@ -110,7 +110,7 @@ Any stuff written in data mode is treated as data, i.e., the computer will not t
 
 #+begin_src common-lisp
 
-  '(expt 2 3) ;; returns (expt 2 3)
+  '(expt 2 3) ;; --> (expt 2 3)
 
 #+end_src
 
@@ -152,7 +152,7 @@ In this section we are introduced to three basic functions to manipulate lists i
 
 #+begin_src common-lisp
 
-  (cons 'chicken 'cat) ;; returns (CHICKEN . CAT)
+  (cons 'chicken 'cat) ;; --> (CHICKEN . CAT)
   
 #+end_src 
 
@@ -164,7 +164,7 @@ Linking with ~nil~ results in just a list of with single element.
 
   (cons 'chicken ())
     ;; or
-  (cons 'chicken 'nil) ;; returns (CHICKEN)
+  (cons 'chicken 'nil) ;; --> (CHICKEN)
                        ;; because nil = (), the empty list
 
 #+end_src
@@ -176,9 +176,9 @@ Linking with ~nil~ results in just a list of with single element.
 
 #+begin_src common-lisp
 
-  (cdr '(pork beef chicken)) ;; returns PORK
+  (cdr '(pork beef chicken)) ;; --> PORK
 
-  (cdr '(pork beef chicken)) ;; returns (BEEF CHICKEN)
+  (cdr '(pork beef chicken)) ;; --> (BEEF CHICKEN)
 
 #+end_src
 
@@ -189,7 +189,7 @@ Linking with ~nil~ results in just a list of with single element.
 
 #+begin_src common-lisp
 
-  (car '(beef chicken)) ;; returns BEEF
+  (car '(beef chicken)) ;; --> BEEF
 
 #+end_src
 
@@ -201,7 +201,7 @@ Linking with ~nil~ results in just a list of with single element.
 
 #+begin_src common-lisp
 
-  (list 'pork 'beef 'chicken) ;; returns (PORK BEEF CHICKEN)
+  (list 'pork 'beef 'chicken) ;; --> (PORK BEEF CHICKEN)
 
   ;; is equivalent to
   (cons 'pork (cons 'beef (cons 'chicken ())))
@@ -221,16 +221,16 @@ The following shows some examples of working with nested lists.
 #+begin_src common-lisp
 
   (car '((peas carrots tomatoes) (pork beef chicken)))
-  ;; returns (PEAS CARROTS TOMATOES)
+  ;; --> (PEAS CARROTS TOMATOES)
 
   (cdr '(peas carrots tomatoes))
-  ;; returns (CARROTS TOMATOES)
+  ;; --> (CARROTS TOMATOES)
 
   (cdr (car '((peas carrots tomatoes) (pork beef chicken))))
-  ;; returns (CARROTS TOMATOES)
+  ;; --> (CARROTS TOMATOES)
 
   (cdar '((peas carrots tomatoes) (pork chicken)))
-  ;; returns (CARROTS TOMATOES)
+  ;; --> (CARROTS TOMATOES)
 
 #+end_src
 
