@@ -1,0 +1,396 @@
+#+TITLE: Making Decisions with Conditions
+#+AUTHOR: Michael Espeña
+#+DESCRIPTION: Notes on Chapter 4: Learning commands for handling conditions
+
+* Table of contents :TOC:
+- [[#the-symmetry-of-nil-and-][The symmetry of nil and ()]]
+  - [[#empty-equals-false][Empty equals false]]
+  - [[#four-disguises-of-][Four disguises of ()]]
+- [[#conditionals-if-and-beyond][Conditionals: if and beyond]]
+  - [[#one-thing-at-a-time-with-if][One thing at a time with if]]
+  - [[#going-beyond-if-the-when-and-unless-alternatives][Going beyond if: the when and unless alternatives]]
+  - [[#the-command-that-does-it-all-cond][The command that does it all: cond]]
+  - [[#branching-with-case][Branching with case]]
+- [[#cool-tricks-with-conditions][Cool tricks with conditions]]
+  - [[#using-the-stealth-conditionals-and-and-or][Using the stealth conditionals /and/ and /or/]]
+- [[#using-functions-that-return-more-than-just-the-truth][Using functions that return more than just the truth]]
+- [[#comparing-stuff-eq-equal-and-more][Comparing stuff: eq, equal, and more]]
+  - [[#eq][eq]]
+  - [[#equal][equal]]
+  - [[#eql][eql]]
+  - [[#equalp][equalp]]
+- [[#summary][Summary]]
+
+* The symmetry of nil and ()
+
+** Empty equals false
+
+() is false.
+
+#+begin_src common-lisp
+
+  (if '()
+      'i-am-true
+      'i-am-false) ;; --> I-AM-FALSE
+
+  (if '(1)
+      'i-am-true
+      'i-am-false) ;; --> I-AM-TRUE
+
+#+end_src
+
+Because we can easily detect and empty list, we can process lists using recursion.
+
+For example here is a function that calculates the length of a list.
+
+#+begin_src common-lisp
+
+  (defun my-length (list)
+    (if list
+	(1+ (my-length (cdr list)))
+	0))
+
+  (my-length '(list with four symbols)) ;; --> 4
+
+#+end_src
+
+It recursively calls itself essentially cutting the list's head off until it gets to an empty list and then increments the length as it pops off the stack.
+
+** Four disguises of ()
+
+*IMPORTANT*: Not only does the empty list evaluate to false, but it is the /only/ false value in Common Lisp.
+
+However, the following are aliases for the empy list as demonstrated by the ~eq~ command.
+
+#+begin_src common-lisp
+
+  (eq '() nil)  ;; --> T
+  (eq '() ())   ;; --> T
+  (eq '() 'nil) ;; --> T
+
+#+end_src
+
+
+* Conditionals: if and beyond
+
+** One thing at a time with if
+
+Using ~if~ like normal:
+
+#+begin_src common-lisp
+
+  (if (= (+ 1 2) 3)
+      'yup
+      'nope) ; --> YUP
+
+  (if (= (+ 1 2) 4)
+      'yup
+      'nope) ;; --> NOPE
+
+#+end_src
+
+Using ~if~ to checker whether a list is empty:
+
+#+begin_src common-lisp
+
+  (if '(1)
+      'the-list-has-stuff-in-it
+      'the-list-is-empty) ;; --> THE-LIST-HAS-STUFF-IN-IT
+
+  (if '()
+      'the-list-has-stuff-in-it
+      'the-list-is-empty) ;; --> THE-LIST-IS-EMPTY
+
+#+end_src
+
+*** progn
+
+Use ~progn~ to wedge in extra command in a single expression.
+
+#+begin_src common-lisp
+
+  (defvar *number-was-odd* nil)
+
+  (if (odd 5)
+      (progn (setf *number-was-odd* t)
+	     'odd-number)
+      'even-number)                      ;; --> ODD-NUMBER
+                                         ;; *number-was-odd* --> T
+
+#+end_src
+
+** Going beyond if: the when and unless alternatives
+
+To avoid using ~progn~ every time you want to use multiples things inside an ~if~, Lisp has several other commands that include an implicit ~progn~.
+
+#+begin_src common-lisp
+
+  (defvar *number-is-odd* nil)
+  (when (oddp 5)
+        (setf *number-is-odd* t)
+        'odd-number)                   ;; --> ODD-NUMBER
+	   			       ;; *number-is-odd* t --> T
+
+  (unless (oddp 4)
+          (setf *number-is-odd* nil)
+          'even-number)                ;; --> EVEN-NUMBER
+                                       ;; *number-is-odd* --> NIL
+
+#+end_src
+
++ With ~when~, all enlosed expressions are evaluated when the condition is true.
++ With ~unless~, all the enclosed expressions are evaluated when the condition is false.
+
+*NOTE*: ~when~ and ~unless~ can't do anything when the condition evaluates in the opposite way; they just return ~nil~ and do nothing.
+
+** The command that does it all: cond
+
+The ~cond~ form is The One True Lisp Conditional. It allows for an implicit ~progn~, can handle more than one branch, and can even evaluate several conditions in succesion.
+
+#+begin_src common-lisp
+
+  (defvar *arch-enemy* nil)
+  (defun pudding-eater (person)
+    (cond ((eq person 'henry) (setf *arch-enemy* 'stupid-lisp-alien)
+                       	      '(curse you lisp alien - you ate my pudding))
+	  ((eq person 'johnny) (setf *arch-enemy* 'useless-old-johnny)
+  	                       '(i hope you choked on my pudding johnny))
+	  (t '(why you eat my pudding stranger ?))))
+ 
+#+end_src
+
+Using the snippet above in the REPL:
+
+#+begin_example
+
+> (pudding-eater 'johnny)
+(I HOPE YOU CHOKED ON MY PUDDING JOHNNY)
+
+> *arch-enemy*
+JOHNNYn
+
+> (pudding-eater 'george-clooney)
+(WHY YOU EAT MY PUDDING STRANGER ?)
+
+#+end_example
+
+
+** Branching with case
+
+The ~case~ form is like the ~switch~ in C programming.
+
+#+begin_src emacs-lisp
+
+  (defun pudding-eater (person)
+    (case person
+	  ((henry) (setf *arc-enemy* 'stupid-lisp-alien)
+	           '(curse you lisp alien - you ate my pudding))
+	  ((johnny) (setf *arch-enemy* 'useless-old-johnny)
+	            '(i hope you choked on my pudding johnny))
+	  (otherwise '(why you eat my pudding stranger ?))))
+
+#+end_src
+
+*NOTE*: ~case~ is uses ~eq~ for comparisons, it is usually only used for branching on symbol values. It cannot be used to branch on string values, among other things.
+
+
+* Cool tricks with conditions
+
+** Using the stealth conditionals /and/ and /or/
+
+#+begin_example
+
+> (and (oddp 5) (oddp 7) (oddp 9))
+T
+
+> (or (oddp 4) (oddp 7) (oddp 8))
+T
+
+#+end_example
+
+You can use ~and~ and ~or~ for conditional behavior.
+
+For instance, here's how we could use these conditionals to set a global variable to true only when a number is even:
+
+#+begin_src common-lisp
+
+  (defparameter *is-it-even* nil) ;; --> *IS-IT-EVEN*
+
+  (or (oddp 4) (setf *is-it-even* t)) ;; --> T
+                                      ;; *is-it-even* --> T 
+
+#+end_src
+
+If we do the same thing using an odd number, the variables remains unchanged:
+
+#+begin_src common-lisp
+
+  (defparameter *is-it-even* nil) ;; --> *IS-IT-EVEN
+
+  (or (oddp 5) (setf *is-it-even* t)) ;; --> T
+                                      ;; *is-it-even* --> NIL
+
+#+end_src
+
+The two examples above, illustrates that Lisp uses /shortcut Boolean evaluation/. This means that once Lisp determines that an earlier statement in a list of ~or~ values is true, it simply returns true and doesn't bother evaluating the remaining statements. Similarly, once it determines that an earlier statement in a list of ~and~ values is false, it stops without bothering to evaluate the rest of the statements.
+
+This simple observation has some implications. For example, imagine you want to save a file to disk, but only if the file was modified, and only when the user wants it to be saved.
+
+#+begin_src common-lisp
+
+  (if *file-modified*
+      (if (ask-user-about-saving)
+	  (save-file)))
+
+#+end_src
+
+Here, the function ~ask-user-about-saving~ would ask the user about the file, and then return true or false based on the user's wishes.
+
+However, since shortcut Boolean evaluation is guaranteed to be used for Boolean operations under Common Lisp, we could rewrite the snippet above as:
+
+#+begin_src common-lisp
+
+  (and *file-modified* (ask-user-about-saving) (save-file))
+
+#+end_src
+
+The above is much cleaner, however, others would argue that a reader of your code may easily miss the fact that (save-file) does something beyond returning a Boolean value.
+
+A third way to write this code, a compromise between the previous two approaches:
+
+#+begin_src common-lisp
+
+  (if (and *file-modified*
+	   (ask-user-about-saving))
+      (save-file))
+
+#+end_src
+
+
+* Using functions that return more than just the truth
+
+Any value in Common Lisp (except for nil and its equivalents) is true. This means that functions have the option to return /more than just the truth/.
+
+#+begin_src common-lisp
+
+  (if (member 1 '(3 4 1 5))
+      'one-is-in-the-list
+      'one-is-not-in-the-list) ;; --> 'ONE-IS-IN-THE-LIST
+
+#+end_src
+
+The above seems normal but in the REPL,
+
+#+begin_example
+
+> (member 1 '(3 4 1 5))
+
+(1 5)
+
+#+end_example
+
+Since any non-nil value is true we can return more than just the truth, that is return values that may be useful for some other thing.
+
+*TODO*: Don't know how to explain this section.
+#+begin_src common-lisp
+
+  (find-if #'oddp '(2 4 5 6)) ;; --> 5
+
+  (if (find-if #'oddp '(2 4 5 6))
+      'there-is-an-odd-number
+      'there-is-no-odd-number) ;; --> 'there-is-an-odd-number
+
+#+end_src
+
+
+* Comparing stuff: eq, equal, and more
+
+So many functions to compare stuff; the following are the most commonly used:n
++ equal
++ eql
++ eq
++ =
++ string-equal
++ equalp
+
+Conrad's Rule of Thumb for Comparing Stuff:
+1. Use ~eq~ to compare symbols.
+2. Use ~equal~ for everything else.
+
+** eq
+
+Symbols should always be compared to other symbols with eq:
+
+#+begin_src common-lisp
+
+  (defparameter *fruit* 'apple) ;; --> *FRUIT*
+
+  (cond ((eq *fruit* 'apple) 'its-an-apple)
+	((eq *fruit* 'orange) 'its-an-orange)) ;; --> ITS-AN-APPLE
+
+#+end_src
+
+** equal
+
+If you're not dealing with two symbols, just use ~equal~. This command will tell you when tow things are /isomorphic/, meaning "they look the same".
+
+#+begin_src common-lisp
+
+  ;; comparing symbols
+  (equal 'apple 'apple) ;; --> T
+
+  ;; comparing lists
+  (equal (list 1 2 3) (list 1 2 3)) ;; --> T
+
+  ;; identical lists created in different ways still compare as the same
+  (equal '(1 2 3) (cons 1 (cons 2 (cons 3)))) ;; --> T
+
+  ;; comparing integers
+  (equal 5 5) ;; --> T
+
+  ;; comparing floating point numbers
+  (equal 2.5 2.5) ;; --> T
+
+  ;; comparing strings
+  (equal "foo" "foo") ;; --> T
+
+  ;; comparing characters
+  (equal #\a #\a) ;; --> T
+
+#+end_src
+
+** eql
+
+The ~eql~ command is similar to ~eq~, but it also handles comparisons of numbers and characters.
+
+#+begin_src common-lisp
+
+   (eql 'foo 'foo) ;; --> T
+   (eql 3.4 3.4) ;; --> T
+   (eql #\a #\a) ;; --> T
+#+end_src
+
+** equalp
+
+The ~equalp~ command is similar to ~equal~, except it can handle some difficult comparsison cases with a bit of extra sophistication.
+
+#+begin_src common-lisp
+
+  ;; comparing strings with different CAPS
+  (equalp "Bob Smith" "bob smith") ;; --> T
+
+  ;; comparing integers against floating point numbers
+  (equalp 0 0.0) ;; --> T  
+
+#+end_src
+
+The remaining comparison commands are just specialization for specific datatypes, otherwise they are similar to ~equal~. For instance, the ~=~ function handles numbers, ~string-equal~ handles strings, and ~char-equal~ handles characters.
+
+
+* Summary
+
++ The values nil, 'nil, (), and '() are all basically the same things in Common Lisp.
++ Lisp makes it easy to check for empty lists. This makes it simple to write list-eaters.
++ Lisp conditionals, such as the ~if~ command, cause Lisp code to be evaluated only under the right conditions.
++ If you need a conditional command that does everything, the you want to use ~cond~.
++ There are many functions to do comparisons in Lisp.
