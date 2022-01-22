@@ -18,3 +18,4 @@ It will be interesting to see the dynamics of Scheme - from what I've read so fa
 
 + Chapter 2: Creating Your First Lisp Program
 + Chapter 3: Exploring the Syntax of Lisp Code
++ Chapter 4: Making Decisions with Conditions
